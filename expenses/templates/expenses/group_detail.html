@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ group.name }} - Settleup{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-users"></i> {{ group.name }}</h2>
+            <div>
+                <a href="{% url 'add_expense' group.id %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Expense
+                </a>
+                <a href="{% url 'settlement' group.id %}" class="btn btn-warning">
+                    <i class="fas fa-handshake"></i> Settlement
+                </a>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-users"></i> Group Participants ({{ participants.count }})</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    {% for participant in participants %}
+                        <div class="col-md-4 mb-2">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="badge bg-primary me-2">
+                                    <i class="fas fa-user"></i> {{ participant.name }}
+                                    {% if participant.name == user.get_full_name|default:user.username %}
+                                        <small class="text-light">(You)</small>
+                                    {% endif %}
+                                </span>
+                                {% if participant.name != user.get_full_name|default:user.username %}
+                                    <a href="{% url 'delete_participant' group.id participant.id %}" 
+                                       class="btn btn-sm btn-outline-danger"
+                                       onclick="return confirm('Are you sure you want to remove {{ participant.name }}?')">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12">
+                            <p class="text-muted">No participants added yet.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <form method="post" class="border-top pt-3">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" name="name" class="form-control" 
+                                   placeholder="Enter name " required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" name="add_participant" class="btn btn-success w-100">
+                                <i class="fas fa-user-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-receipt"></i> Recent Expenses</h5>
+            </div>
+            <div class="card-body">
+                {% if expenses %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Expense Name</th>
+                                    <th>Amount</th>
+                                    <th>Paid By</th>
+                                    <th>Split Type</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for expense in expenses %}
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-receipt"></i> {{ expense.name }}
+                                        </td>
+                                        <td>
+                                            <strong>{{ expense.amount }} {{ expense.currency }}</strong>
+                                        </td>
+                                        <td>
+                                            {% if expense.payer_type == 'single' and expense.paid_by %}
+                                                <span class="badge bg-success">{{ expense.paid_by.name }}</span>
+                                            {% elif expense.payer_type == 'multiple' %}
+                                                {% for payer in expense.payers.all %}
+                                                    <span class="badge bg-success me-1">{{ payer.payer.name }}</span>
+                                                {% empty %}
+                                                    <span class="text-muted">No payers</span>
+                                                {% endfor %}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ expense.get_split_type_display }}</span>
+                                        </td>
+                                        <td>{{ expense.created_at|date:"M d, Y" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                        <h5>No Expenses Yet</h5>
+                        {% if participants.count > 0 %}
+                            <p class="text-muted">Start adding expenses to track group spending!</p>
+                        {% else %}
+                            <p class="text-muted">Add participants first, then start tracking expenses!</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

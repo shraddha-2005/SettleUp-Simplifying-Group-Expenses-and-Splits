@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SettleUp - Simplifying Group Expenses</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% load static %}
+    <link href="{% static 'css/landing.css' %}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calculator"></i> 
+                SettleUp
+            </a>
+            <div class="nav-buttons">
+                <a href="{% url 'login' %}" class="btn btn-login">Log in</a>
+                <a href="{% url 'register' %}" class="btn btn-signup">Sign up</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 hero-content">
+                    <h1>Simplifying Group Expenses and Splits</h1>
+                    <h4>No more confusion with shared bills. Track who paid what, calculate splits automatically, and settle up with ease.</h4>
+                    <br>
+                    <a href="{% url 'register' %}" class="btn btn-cta mb-4">Get Started Free</a>
+                </div>
+                <div class="col-lg-4 d-none d-lg-block text-center">
+                    <img src="{% static 'images/image1.png' %}" alt="SettleUp Illustration" class="hero-image">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">What SettleUp Does</h2>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Create Groups</h3>
+                        <p>Manually create groups and add participants for trips, flat shares, or any shared expenses.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                        <h3>Log Expenses</h3>
+                        <p>Add expense details with amount, description, and choose equal or custom split types.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <h3>Auto Calculate</h3>
+                        <p>Automatically calculates balances and shows who owes whom with transparent breakdowns.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3>Settle Payments</h3>
+                        <p>Record payments and mark debts as settled with optimized settlement suggestions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-grid">
+        <div class="container">
+            <h2 class="section-title">Real-World Scenarios We Solve</h2>
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="scenario-card">
+                        <div class="scenario-icon">
+                            <i class="fas fa-coffee"></i>
+                        </div>
+                        <h4>Café with Friends</h4>
+                        <p>One orders veg, another non-veg, someone adds dessert. One person pays. SettleUp splits it fairly based on what each person ordered.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="scenario-card">
+                        <div class="scenario-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <h4>Flatmate Bills</h4>
+                        <p>Split rent, groceries, Wi-Fi, and electricity. Multiple people pay different bills. Track everything in one place.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="scenario-card">
+                        <div class="scenario-icon">
+                            <i class="fas fa-taxi"></i>
+                        </div>
+                        <h4>Shared Cab Rides</h4>
+                        <p>Not everyone travels the full distance? Split costs based on who traveled how far with custom splits.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-title mt-5">Core Features</h2>
+            <div class="features-list">
+                <div class="feature-item">
+                    <i class="fas fa-plus-circle"></i>
+                    <div>
+                        <h4>Manual Group Creation</h4>
+                        <p>Create groups and add member names manually</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-divide"></i>
+                    <div>
+                        <h4>Equal & Unequal Splits</h4>
+                        <p>Split equally or set custom amounts per person</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-users-cog"></i>
+                    <div>
+                        <h4>Single or Multiple Payers</h4>
+                        <p>Handle expenses paid by one or multiple members</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-calculator"></i>
+                    <div>
+                        <h4>Automated Balance Tracking</h4>
+                        <p>Automatically calculates who owes how much to whom</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-chart-line"></i>
+                    <div>
+                        <h4>Smart Settlement View</h4>
+                        <p>View optimized payment paths to clear all dues efficiently</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <div>
+                        <h4>Dummy Payment Simulation</h4>
+                        <p>Simulate and record payments with date tracking for easy settlement</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>Stop the Manual Calculations</h2>
+            <p>Let SettleUp handle the math while you focus on what matters</p>
+            <a href="{% url 'register' %}" class="btn btn-cta">Start Tracking Now</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="text-center" style="opacity: 0.7;">
+                <p>&copy; 2025 SettleUp. Built for simplifying group expenses.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const ctaSection = document.querySelector('.cta-section');
+            if (!ctaSection) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        ctaSection.classList.add('in-view');
+                    }
+                });
+            }, { threshold: 0.3 }); 
+
+            observer.observe(ctaSection);
+        });
+    </script>
+</body>
+</html>

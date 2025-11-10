@@ -1,0 +1,452 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Expense - {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Add Expense - {{ group.name }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" id="expenseForm">
+                    {% csrf_token %}
+                    
+                    {% if participants.count == 1 %}
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Personal Expense:</strong> This expense only includes you, so it's recorded as a personal expense.
+                    </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">Expense Name</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="text-danger">{{ form.name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.amount.id_for_label }}" class="form-label">Total Amount</label>
+                            {{ form.amount }}
+                            {% if form.amount.errors %}
+                                <div class="text-danger">{{ form.amount.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.currency.id_for_label }}" class="form-label">Currency</label>
+                            {{ form.currency }}
+                            {% if form.currency.errors %}
+                                <div class="text-danger">{{ form.currency.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3" id="split-type-container" {% if participants.count == 1 %}style="display: none;"{% endif %}>
+                            <label for="{{ form.split_type.id_for_label }}" class="form-label">Split Type</label>
+                            {{ form.split_type }}
+                            {% if form.split_type.errors %}
+                                <div class="text-danger">{{ form.split_type.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3" id="payer-type-container" {% if participants.count == 1 %}style="display: none;"{% endif %}>
+                            <label for="payer_type" class="form-label">Payer Type</label>
+                            <select name="payer_type" id="payer_type" class="form-control" {% if participants.count != 1 %}required{% endif %}>
+                                <option value="single">Single Payer</option>
+                                <option value="multiple">Multiple Payers</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="single-payer-section" class="mb-3" {% if participants.count == 1 %}style="display: none;"{% endif %}>
+                        <label class="form-label">Who Paid?</label>
+                        <select name="paid_by" id="paid_by" class="form-control">
+                            <option value="">Select who paid for this expense</option>
+                            {% for participant in participants %}
+                                <option value="{{ participant.id }}">{{ participant.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div id="multiple-payers-section" style="display: none;">
+                        <div class="card mt-3 mb-3">
+                            <div class="card-header text-white">
+                                <h6 class="mb-0"><i class="fas fa-users"></i> Multiple Payers</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="payer-inputs">
+                                    {% for participant in participants %}
+                                        <div class="row mb-2 align-items-center">
+                                            <div class="col-md-4">
+                                                <label class="form-label mb-0">
+                                                    <i class="fas fa-user"></i> {{ participant.name }}
+                                                </label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <input type="number" 
+                                                       class="form-control payer-input" 
+                                                       data-payer-id="{{ participant.id }}"
+                                                       data-payer-name="{{ participant.name }}"
+                                                       placeholder="0.00" 
+                                                       step="0.01" 
+                                                       min="0"
+                                                       value="0.00">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <span class="currency-display-payer">{{ form.currency.value|default:"USD" }}</span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <strong>Total Expense: <span id="total-expense-payers">0.00</span></strong>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Total Paid: <span id="total-paid">0.00</span></strong>
+                                    </div>
+                                </div>
+
+                                <div id="payers-validation-message" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="equal-split-info" class="alert alert-info" style="display: none;">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Equal Split:</strong> The expense will be divided equally among all group participants.
+                        <div id="equal-amount-display" class="mt-2"></div>
+                    </div>
+
+                    <div id="unequal-split-section" style="display: none;">
+                        <div class="card mt-3">
+                            <div class="card-header bg-warning">
+                                <h6 class="mb-0"><i class="fas fa-calculator"></i> Individual Share Allocation</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> 
+                                    <strong>Important:</strong> The sum of individual shares must equal the total expense amount.
+                                </div>
+                                
+                                <div id="share-inputs">
+                                    {% for participant in participants %}
+                                        <div class="row mb-2 align-items-center participant-share-row">
+                                            <div class="col-md-4">
+                                                <label class="form-label mb-0">
+                                                    <i class="fas fa-user"></i> {{ participant.name }}
+                                                </label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <input type="number" 
+                                                       class="form-control share-input" 
+                                                       data-participant-id="{{ participant.id }}"
+                                                       data-participant-name="{{ participant.name }}"
+                                                       placeholder="0.00" 
+                                                       step="0.01" 
+                                                       min="0"
+                                                       value="0.00">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <span class="currency-display">{{ form.currency.value|default:"USD" }}</span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <strong>Total Amount: <span id="total-expense">0.00</span></strong>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Sum of Shares: <span id="total-shares">0.00</span></strong>
+                                    </div>
+                                </div>
+
+                                <div id="validation-message" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="shares_data" id="shares_data">
+                    <input type="hidden" name="payers_data" id="payers_data">
+                    
+                    <input type="hidden" name="single_member_mode" id="single_member_mode" value="{% if participants.count == 1 %}true{% else %}false{% endif %}">
+                    
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
+                            <i class="fas fa-plus"></i> Add Expense
+                        </button>
+                        <a href="{% url 'group_detail' group.id %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Group
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const participantCount = {{ participants.count }};
+    const isSingleMember = participantCount === 1;
+    
+    const splitTypeSelect = document.getElementById('id_split_type');
+    const payerTypeSelect = document.getElementById('payer_type');
+    const amountInput = document.getElementById('id_amount');
+    const currencySelect = document.getElementById('id_currency');
+    const singlePayerSection = document.getElementById('single-payer-section');
+    const multiplePayersSection = document.getElementById('multiple-payers-section');
+    const equalSplitInfo = document.getElementById('equal-split-info');
+    const unequalSplitSection = document.getElementById('unequal-split-section');
+    const shareInputs = document.querySelectorAll('.share-input');
+    const payerInputs = document.querySelectorAll('.payer-input');
+    const totalExpenseSpan = document.getElementById('total-expense');
+    const totalSharesSpan = document.getElementById('total-shares');
+    const totalExpensePayersSpan = document.getElementById('total-expense-payers');
+    const totalPaidSpan = document.getElementById('total-paid');
+    const validationMessage = document.getElementById('validation-message');
+    const payersValidationMessage = document.getElementById('payers-validation-message');
+    const submitBtn = document.getElementById('submit-btn');
+    const expenseForm = document.getElementById('expenseForm');
+    const paidBySelect = document.getElementById('paid_by');
+
+    if (isSingleMember) {
+        if (paidBySelect && paidBySelect.options.length > 1) {
+            paidBySelect.selectedIndex = 1; 
+        }
+        
+        if (splitTypeSelect) {
+            splitTypeSelect.value = 'equal';
+        }
+        
+        if (payerTypeSelect) {
+            payerTypeSelect.value = 'single';
+        }
+    }
+
+    function togglePayerSections() {
+        if (isSingleMember) return; 
+        
+        const payerType = payerTypeSelect.value;
+        
+        if (payerType === 'single') {
+            singlePayerSection.style.display = 'block';
+            multiplePayersSection.style.display = 'none';
+            paidBySelect.required = true;
+        } else if (payerType === 'multiple') {
+            singlePayerSection.style.display = 'none';
+            multiplePayersSection.style.display = 'block';
+            paidBySelect.required = false;
+            updateTotalExpensePayers();
+            calculateTotalPaid();
+        }
+    }
+
+    function toggleSplitSections() {
+        if (isSingleMember) return; 
+        
+        const splitType = splitTypeSelect.value;
+        
+        if (splitType === 'equal') {
+            equalSplitInfo.style.display = 'block';
+            unequalSplitSection.style.display = 'none';
+            updateEqualSplitDisplay();
+        } else if (splitType === 'unequal') {
+            equalSplitInfo.style.display = 'none';
+            unequalSplitSection.style.display = 'block';
+            updateTotalExpense();
+        } else {
+            equalSplitInfo.style.display = 'none';
+            unequalSplitSection.style.display = 'none';
+        }
+    }
+
+    function updateEqualSplitDisplay() {
+        const totalAmount = parseFloat(amountInput.value) || 0;
+        if (totalAmount > 0 && participantCount > 0) {
+            const amountPerPerson = (totalAmount / participantCount).toFixed(2);
+            const currency = currencySelect.value || 'USD';
+            document.getElementById('equal-amount-display').innerHTML = 
+                `<strong>Amount per person: ${amountPerPerson} ${currency}</strong>`;
+        }
+    }
+
+    function updateTotalExpense() {
+        const totalAmount = parseFloat(amountInput.value) || 0;
+        const currency = currencySelect.value || 'USD';
+        totalExpenseSpan.textContent = totalAmount.toFixed(2);
+        
+        document.querySelectorAll('.currency-display').forEach(span => {
+            span.textContent = currency;
+        });
+    }
+
+    function updateTotalExpensePayers() {
+        const totalAmount = parseFloat(amountInput.value) || 0;
+        const currency = currencySelect.value || 'USD';
+        totalExpensePayersSpan.textContent = totalAmount.toFixed(2);
+        
+        document.querySelectorAll('.currency-display-payer').forEach(span => {
+            span.textContent = currency;
+        });
+    }
+
+    function calculateTotalShares() {
+        let totalShares = 0;
+        const shares = {};
+        
+        shareInputs.forEach(input => {
+            const amount = parseFloat(input.value) || 0;
+            const participantId = input.dataset.participantId;
+            totalShares += amount;
+            shares[participantId] = amount;
+        });
+        
+        totalSharesSpan.textContent = totalShares.toFixed(2);
+        
+        const totalExpense = parseFloat(amountInput.value) || 0;
+        const difference = Math.abs(totalShares - totalExpense);
+        
+        if (totalExpense === 0) {
+            validationMessage.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Please enter total expense amount first.</div>';
+            return false;
+        } else if (difference > 0.01) {
+            const shortfall = totalExpense - totalShares;
+            if (shortfall > 0) {
+                validationMessage.innerHTML = `<div class="alert alert-danger"><i class="fas fa-times-circle"></i> Shares are <strong>${shortfall.toFixed(2)}</strong> less than total amount.</div>`;
+            } else {
+                validationMessage.innerHTML = `<div class="alert alert-danger"><i class="fas fa-times-circle"></i> Shares are <strong>${Math.abs(shortfall).toFixed(2)}</strong> more than total amount.</div>`;
+            }
+            return false;
+        } else {
+            validationMessage.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle"></i> Shares match total amount perfectly!</div>';
+            document.getElementById('shares_data').value = JSON.stringify(shares);
+            return true;
+        }
+    }
+
+    function calculateTotalPaid() {
+        let totalPaid = 0;
+        const payers = {};
+        
+        payerInputs.forEach(input => {
+            const amount = parseFloat(input.value) || 0;
+            const payerId = input.dataset.payerId;
+            totalPaid += amount;
+            if (amount > 0) {
+                payers[payerId] = amount;
+            }
+        });
+        
+        totalPaidSpan.textContent = totalPaid.toFixed(2);
+        
+        const totalExpense = parseFloat(amountInput.value) || 0;
+        const difference = Math.abs(totalPaid - totalExpense);
+        
+        if (totalExpense === 0) {
+            payersValidationMessage.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Please enter total expense amount first.</div>';
+            return false;
+        } else if (totalPaid === 0) {
+            payersValidationMessage.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Please specify who paid for this expense.</div>';
+            return false;
+        } else if (difference > 0.01) {
+            const shortfall = totalExpense - totalPaid;
+            if (shortfall > 0) {
+                payersValidationMessage.innerHTML = `<div class="alert alert-danger"><i class="fas fa-times-circle"></i> Total paid is <strong>${shortfall.toFixed(2)}</strong> less than expense amount.</div>`;
+            } else {
+                payersValidationMessage.innerHTML = `<div class="alert alert-danger"><i class="fas fa-times-circle"></i> Total paid is <strong>${Math.abs(shortfall).toFixed(2)}</strong> more than expense amount.</div>`;
+            }
+            return false;
+        } else {
+            payersValidationMessage.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle"></i> Total paid matches expense amount perfectly!</div>';
+            document.getElementById('payers_data').value = JSON.stringify(payers);
+            return true;
+        }
+    }
+
+    if (!isSingleMember) {
+        payerTypeSelect.addEventListener('change', togglePayerSections);
+        splitTypeSelect.addEventListener('change', toggleSplitSections);
+    }
+    
+    amountInput.addEventListener('input', function() {
+        if (!isSingleMember) {
+            updateEqualSplitDisplay();
+            updateTotalExpense();
+            updateTotalExpensePayers();
+            
+            if (splitTypeSelect.value === 'unequal') {
+                calculateTotalShares();
+            }
+            
+            if (payerTypeSelect.value === 'multiple') {
+                calculateTotalPaid();
+            }
+        }
+    });
+    
+    currencySelect.addEventListener('change', function() {
+        if (!isSingleMember) {
+            updateEqualSplitDisplay();
+            updateTotalExpense();
+            updateTotalExpensePayers();
+        }
+    });
+
+    if (!isSingleMember) {
+        shareInputs.forEach(input => {
+            input.addEventListener('input', calculateTotalShares);
+        });
+
+        payerInputs.forEach(input => {
+            input.addEventListener('input', calculateTotalPaid);
+        });
+    }
+
+    expenseForm.addEventListener('submit', function(e) {
+        if (isSingleMember) {
+            return true;
+        }
+        
+        const payerType = payerTypeSelect.value;
+        const splitType = splitTypeSelect.value;
+        
+        if (payerType === 'single') {
+            if (!paidBySelect.value) {
+                e.preventDefault();
+                alert('Please select who paid for this expense.');
+                return false;
+            }
+        } else if (payerType === 'multiple') {
+            if (!calculateTotalPaid()) {
+                e.preventDefault();
+                alert('Please ensure the total paid matches the expense amount before submitting.');
+                return false;
+            }
+        }
+        
+        if (splitType === 'unequal') {
+            if (!calculateTotalShares()) {
+                e.preventDefault();
+                alert('Please ensure the sum of shares equals the total expense amount before submitting.');
+                return false;
+            }
+        }
+    });
+
+    if (!isSingleMember) {
+        togglePayerSections();
+        toggleSplitSections();
+    }
+});
+</script>
+{% endblock %}
