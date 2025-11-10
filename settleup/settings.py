@@ -15,9 +15,8 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'myTYProject'
-
-DEBUG = True
+SECRET_KEY = os.environ.get('SECRET_KEY', 'myTYProject') 
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'         
 
 ALLOWED_HOSTS = ['*']
 
