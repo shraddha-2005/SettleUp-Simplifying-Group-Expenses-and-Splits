@@ -2,6 +2,25 @@
 
 {% block title %}Register - Settleup{% endblock %}
 {% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5t1KCnNJQyIJNiDJQUKE0B1ZaQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+    .password-toggle-icon {
+        position: absolute;
+        left: 200px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        z-index: 10;
+        color: #6c757d;
+        pointer-events: auto;
+    }
+    .password-wrapper {
+        position: relative;
+    }
+    .password-wrapper input {
+        padding-right: 40px;
+    }
+</style>
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card">
@@ -12,18 +31,10 @@
                 <form method="post">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
-                        {{ form.first_name }}
-                        {% if form.first_name.errors %}
-                            <div class="text-danger">{{ form.first_name.errors }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
-                        {{ form.last_name }}
-                        {% if form.last_name.errors %}
-                            <div class="text-danger">{{ form.last_name.errors }}</div>
+                        <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors }}</div>
                         {% endif %}
                     </div>
                     
@@ -34,31 +45,29 @@
                             <div class="text-danger">{{ form.username.errors }}</div>
                         {% endif %}
                     </div>
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                            <div class="text-danger">{{ form.email.errors }}</div>
-                        {% endif %}
-                    </div>
-                    
+
                     <div class="mb-3">
                         <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
-                        {{ form.password1 }}
+                        <div class="password-wrapper">
+                            {{ form.password1 }}
+                            <i class="fa fa-eye password-toggle-icon" data-target="password1"></i>
+                        </div>
                         {% if form.password1.errors %}
                             <div class="text-danger">{{ form.password1.errors }}</div>
                         {% endif %}
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password</label>
-                        {{ form.password2 }}
+                        <div class="password-wrapper">
+                            {{ form.password2 }}
+                            <i class="fa fa-eye password-toggle-icon" data-target="password2"></i>
+                        </div>
                         {% if form.password2.errors %}
                             <div class="text-danger">{{ form.password2.errors }}</div>
                         {% endif %}
                     </div>
-                    
+
                     <button type="submit" class="btn btn-primary w-100">
                         Register
                     </button>
@@ -68,4 +77,23 @@
         </div>
     </div>
 </div>
+<script>
+document.querySelectorAll('.password-toggle-icon').forEach(function(icon) {
+    icon.addEventListener('click', function() {
+        const input = this.previousElementSibling;
+        
+        if (input && input.tagName === 'INPUT') {
+            if (input.type === 'password') {
+                input.type = 'text';
+                this.classList.remove('fa-eye');
+                this.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                this.classList.remove('fa-eye-slash');
+                this.classList.add('fa-eye');
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

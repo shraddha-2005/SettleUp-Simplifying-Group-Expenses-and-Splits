@@ -14,45 +14,49 @@
             align-items: center !important;
             font-weight: 700 !important;
             font-size: 1.5rem !important;
-            color: var(--primary-light) !important;
+            /* Note: 'var(--primary-light)' is not defined here, assuming a fallback or it's in styles.css */
+            color: var(--primary-light, #00bfff) !important;
             text-shadow: 0 0 15px rgba(0, 191, 255, 0.5) !important;
         }
         .brand-icon {
-            color: #00bfff  !important;
+            color: #00bfff  !important;
             margin-right: 10px !important;
             font-size: 1.5rem !important;
         }
-        .container{
-            height:60px;
-        }
+        /* Removed .container height restriction as it might cause issues */
+        /* .container{
+            height:60px; 
+        } */
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'login' %}{% endif %}">
-                <span class="brand-icon">
-                    <i class="fas fa-calculator"></i>
-                </span>
-                <span class="brand-text">SettleUp</span>
-            </a>
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand" href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'login' %}{% endif %}">
+            <span class="brand-icon">
+                <i class="fas fa-calculator"></i>
+            </span>
+            <span class="brand-text">SettleUp</span>
+        </a>
+        
+        {% if user.is_authenticated %}
+        <div class="d-flex align-items-center">
+            <span class="navbar-text me-3 d-flex align-items-center text-white">
+                <i class="fas fa-user me-1"></i> 
+                {{ user.first_name }} {{ user.last_name }}
+                {% if not user.first_name %}{{ user.username }}{% endif %}
+            </span>
             
-            {% if user.is_authenticated %}
-            <div class="navbar-nav ms-auto">
-                <span class="navbar-text me-3">
-                    <i class="fas fa-user"></i> {{ user.first_name }} {{ user.last_name }}
-                    {% if not user.first_name %}{{ user.username }}{% endif %}
-                </span>
-                <form method="post" action="{% url 'logout' %}" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-light btn-sm">
-                        Logout
-                    </button>
-                </form>
-            </div>
-            {% endif %}
+            <form method="post" action="{% url 'logout' %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                    Logout
+                </button>
+            </form>
         </div>
-    </nav>
+        {% endif %}
+    </div>
+</nav>
 
     <div class="container mt-4">
         {% if messages %}
