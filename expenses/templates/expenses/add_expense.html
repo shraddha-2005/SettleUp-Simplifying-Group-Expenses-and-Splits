@@ -3,6 +3,67 @@
 {% block title %}Add Expense - {{ group.name }}{% endblock %}
 
 {% block content %}
+<style>
+    @media (min-width: 768px) {
+        .participant-input-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .participant-input-row .participant-label {
+            flex: 0 0 33.333333%;
+            max-width: 33.333333%;
+            padding-right: 0.75rem;
+        }
+        
+        .participant-input-row .participant-input-col {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding-right: 0.75rem;
+        }
+        
+        .participant-input-row .participant-currency-col {
+            flex: 0 0 16.666667%;
+            max-width: 16.666667%;
+        }
+        
+        .participant-input-row .currency-label {
+            font-weight: 600;
+            color: #ffffffff;
+        }
+    }
+    
+    @media (max-width: 767px) {
+        .participant-input-row {
+            margin-bottom: 1rem;
+        }
+        
+        .participant-label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .input-with-currency-mobile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-with-currency-mobile input {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .input-with-currency-mobile .currency-label {
+            flex-shrink: 0;
+            font-weight: 600;
+            color: #fefefeff;
+            min-width: 40px;
+        }
+    }
+</style>
+
 <div class="row justify-content-center">
     <div class="col-md-10">
         <div class="card">
@@ -82,24 +143,27 @@
                             <div class="card-body">
                                 <div id="payer-inputs">
                                     {% for participant in participants %}
-                                        <div class="row mb-2 align-items-center">
-                                            <div class="col-md-4">
+                                        <div class="participant-input-row">
+                                            <div class="participant-label">
                                                 <label class="form-label mb-0">
                                                     <i class="fas fa-user"></i> {{ participant.name }}
                                                 </label>
                                             </div>
-                                            <div class="col-md-6">
-                                                <input type="number" 
-                                                       class="form-control payer-input" 
-                                                       data-payer-id="{{ participant.id }}"
-                                                       data-payer-name="{{ participant.name }}"
-                                                       placeholder="0.00" 
-                                                       step="0.01" 
-                                                       min="0"
-                                                       value="0.00">
+                                            <div class="participant-input-col">
+                                                <div class="input-with-currency-mobile d-md-block">
+                                                    <input type="number" 
+                                                           class="form-control payer-input" 
+                                                           data-payer-id="{{ participant.id }}"
+                                                           data-payer-name="{{ participant.name }}"
+                                                           placeholder="0.00" 
+                                                           step="0.01" 
+                                                           min="0"
+                                                           value="0.00">
+                                                    <span class="currency-label d-md-none currency-display-payer">{{ form.currency.value|default:"USD" }}</span>
+                                                </div>
                                             </div>
-                                            <div class="col-md-2">
-                                                <span class="currency-display-payer">{{ form.currency.value|default:"USD" }}</span>
+                                            <div class="participant-currency-col d-none d-md-block">
+                                                <span class="currency-label currency-display-payer">{{ form.currency.value|default:"USD" }}</span>
                                             </div>
                                         </div>
                                     {% endfor %}
@@ -138,24 +202,27 @@
                                 
                                 <div id="share-inputs">
                                     {% for participant in participants %}
-                                        <div class="row mb-2 align-items-center participant-share-row">
-                                            <div class="col-md-4">
+                                        <div class="participant-input-row participant-share-row">
+                                            <div class="participant-label">
                                                 <label class="form-label mb-0">
                                                     <i class="fas fa-user"></i> {{ participant.name }}
                                                 </label>
                                             </div>
-                                            <div class="col-md-6">
-                                                <input type="number" 
-                                                       class="form-control share-input" 
-                                                       data-participant-id="{{ participant.id }}"
-                                                       data-participant-name="{{ participant.name }}"
-                                                       placeholder="0.00" 
-                                                       step="0.01" 
-                                                       min="0"
-                                                       value="0.00">
+                                            <div class="participant-input-col">
+                                                <div class="input-with-currency-mobile d-md-block">
+                                                    <input type="number" 
+                                                           class="form-control share-input" 
+                                                           data-participant-id="{{ participant.id }}"
+                                                           data-participant-name="{{ participant.name }}"
+                                                           placeholder="0.00" 
+                                                           step="0.01" 
+                                                           min="0"
+                                                           value="0.00">
+                                                    <span class="currency-label d-md-none currency-display">{{ form.currency.value|default:"USD" }}</span>
+                                                </div>
                                             </div>
-                                            <div class="col-md-2">
-                                                <span class="currency-display">{{ form.currency.value|default:"USD" }}</span>
+                                            <div class="participant-currency-col d-none d-md-block">
+                                                <span class="currency-label currency-display">{{ form.currency.value|default:"USD" }}</span>
                                             </div>
                                         </div>
                                     {% endfor %}
