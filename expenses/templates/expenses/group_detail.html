@@ -4,7 +4,6 @@
 
 {% block content %}
 <style>
-    /* Mobile button layout fix */
     @media (max-width: 767px) {
         .mobile-button-container {
             display: flex;
@@ -24,15 +23,13 @@
             font-size: 0.875rem;
         }
         
-        /* Hide button text on very small screens, keep icons */
         @media (max-width: 380px) {
             .mobile-button-container .btn-text {
                 display: none;
             }
         }
     }
-    
-    /* Desktop layout */
+
     @media (min-width: 768px) {
         .mobile-button-container {
             display: flex;
