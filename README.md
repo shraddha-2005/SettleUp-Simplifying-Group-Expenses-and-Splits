@@ -1,7 +1,7 @@
-Overview
-This project is an expense management application designed to track and settle shared expenses within groups. The application utilizes Django framework with SQLite database for data storage. It supports single and multiple payer scenarios with flexible splitting options, automatically calculates balances, and includes a dummy payment feature to simulate settlements.
+Overview:
+ This project is an expense management application designed to track and settle shared expenses within groups. The application utilizes Django framework with SQLite database for data storage. It supports single and multiple payer scenarios with flexible splitting options, automatically calculates balances, and includes a dummy payment feature to simulate settlements.
 
-Features
+Features:
 - Integration with Django framework and SQLite database
 - Manual group and member creation with persistent data storage
 - Flexible expense splitting options (equal and unequal splits)
