@@ -16,6 +16,7 @@ How to Run
 Installation Steps
 1. Clone the Repository
 git clone https://github.com/yourusername/SettleUp-Simplifying-Group-Expenses-and-Splits.git
+
 cd settleup
 2. Create Virtual Environment
 # Windows
